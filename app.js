@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 require("dotenv").config();
 const connectDB = require('./db/connect');
+const complaintsRoutes = require('./routes/complaints');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,9 +24,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-app.get("/complaint", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "complaint.html"));
-});
+app.use('/', complaintsRoutes);
 
 // Start server
 const start = async () => {
