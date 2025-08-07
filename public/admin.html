@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Complaints</title>
+    <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        
+        <div id="login-form" style="display: block;">
+            <h2>Enter Admin Password</h2>
+            <form id="admin-login">
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn">Access Dashboard</button>
+            </form>
+        </div>
+        
+        <div id="dashboard-content" style="display: none;">
+            <h2>All Complaints</h2>
+            <div id="complaints-data">
+                <!-- Complaints will be loaded here -->
+            </div>
+        </div>
+        
+        <a href="/" class="btn">Back to Home</a>
+    </div>
+    
+    <script>
+        // Escape HTML to prevent XSS
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+        
+        // Handle admin login
+        document.getElementById('admin-login').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            
+            // Load complaints data with authentication
+            fetch(`/api/complaints?adminKey=${encodeURIComponent(password)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Invalid password');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Hide login form and show dashboard
+                    document.getElementById('login-form').style.display = 'none';
+                    document.getElementById('dashboard-content').style.display = 'block';
+                    
+                    const container = document.getElementById('complaints-data');
+                    if (data.length === 0) {
+                        container.innerHTML = '<p>No complaints found.</p>';
+                        return;
+                    }
+                    
+                    const table = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Category</th>
+                                    <th>Message</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.map(complaint => `
+                                    <tr>
+                                        <td>${escapeHtml(new Date(complaint.createdAt).toLocaleString())}</td>
+                                        <td>${escapeHtml(complaint.category)}</td>
+                                        <td>${escapeHtml(complaint.message)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                    container.innerHTML = table;
+                })
+                .catch(error => {
+                    alert('Invalid password. Please try again.');
+                    console.error('Authentication error:', error);
+                });
+        });
+    </script>
+</body>
+</html>

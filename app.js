@@ -3,6 +3,7 @@ const path = require("path");
 require("dotenv").config();
 const connectDB = require('./db/connect');
 const complaintsRoutes = require('./routes/complaints');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 });
 
 app.use('/', complaintsRoutes);
+app.use('/', adminRoutes);
 
 // Start server
 const start = async () => {
