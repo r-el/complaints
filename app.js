@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 require("dotenv").config();
+const connectDB = require('./db/connect');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,8 +28,17 @@ app.get("/complaint", (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Server running on http://${HOST}:${PORT}`);
-});
+const start = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`Server running on http://${HOST}:${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+  }
+};
+
+start();
 
 module.exports = app; // For testing
