@@ -17,6 +17,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// Routes
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+app.get("/complaint", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "complaint.html"));
+});
 
 // Start server
 app.listen(PORT, () => {
