@@ -9,7 +9,7 @@ const HOST = process.env.HOST || "localhost";
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public"))); // May need to move this line after the routes
 
 // Log middleware
 app.use((req, res, next) => {
@@ -17,11 +17,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Basic route
-app.get("/", (req, res) => {
-  // res.sendFile(path.join(__dirname, "public", "index.html"));
-  res.json({ message: "Welcome to the Complaints Project API" });
-});
 
 // Start server
 app.listen(PORT, () => {
