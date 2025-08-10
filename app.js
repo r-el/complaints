@@ -6,40 +6,44 @@ const complaintsRoutes = require('./routes/complaints');
 const adminRoutes = require('./routes/admin');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const HOST = process.env.HOST || "localhost";
+const PORT = process.env.PORT || 3000; // Default port
+const HOST = process.env.HOST || "localhost"; // Default host
 
-// Middleware
+// Parse JSON and form data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public"))); // May need to move this line after the routes
 
-// Log middleware
+// Simple request logger (placed early)
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
   next();
 });
 
-// Routes
+// Serve static assets from public folder
+app.use(express.static(path.join(__dirname, "public")));
+
+// Root route serves the index.html
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// Feature routes
 app.use('/', complaintsRoutes);
 app.use('/', adminRoutes);
 
-// Start server
-const start = async () => {
-  try {
-    await connectDB();
-    app.listen(PORT, () => {
-      console.log(`Server running on http://${HOST}:${PORT}`);
-    });
-  } catch (error) {
-    console.error('Failed to start server:', error);
-  }
-};
+// Helper function to start server (not auto-invoked in tests)
+async function startServer() {
+  await connectDB();
+  return app.listen(PORT, () => {
+    console.log(`Server running on http://${HOST}:${PORT}`);
+  });
+}
 
-start();
+// Only start if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+  startServer().catch(err => {
+    console.error('Failed to start server:', err);
+  });
+}
 
-module.exports = app; // For testing
+module.exports = { app, startServer }; // Export both for flexibility in tests
