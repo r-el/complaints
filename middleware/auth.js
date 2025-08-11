@@ -1,9 +1,11 @@
+const path = require('path');
+
 // Middleware to verify admin password
 exports.verifyAdminPassword = (req, res, next) => {
   const { password } = req.body;
   
   if (!password || password !== process.env.ADMIN_PASSWORD) {
-    return res.status(403).send('Invalid password. Access denied.');
+    return res.status(403).sendFile(path.join(__dirname, '../public/403.html'));
   }
   
   // If password is correct, proceed to next middleware/route
