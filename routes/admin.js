@@ -14,5 +14,6 @@ router.post('/admin/login', verifyAdminPassword, (req, res) => {
 
 // Protected API routes for admin (require authentication)
 router.get('/api/complaints', requireAdminAuth, adminController.getAllComplaints);
+router.delete('/api/complaints/:id', requireAdminAuth, adminController.deleteComplaint);
 
 module.exports = router;
