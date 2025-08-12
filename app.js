@@ -1,49 +1,51 @@
 const express = require("express");
 const path = require("path");
 require("dotenv").config();
-const connectDB = require('./db/connect');
-const complaintsRoutes = require('./routes/complaints');
-const adminRoutes = require('./routes/admin');
+const connectDB = require("./db/connect");
+
+// Import routes
+const indexRoutes = require("./routes/index");
+const complaintsRoutes = require("./routes/complaints");
+const adminRoutes = require("./routes/admin");
 
 const app = express();
-const PORT = process.env.PORT || 3000; // Default port
-const HOST = process.env.HOST || "localhost"; // Default host
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || "localhost";
 
-// Parse JSON and form data
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Simple request logger (placed early)
+// Request logger
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
   next();
 });
 
-// Serve static assets from public folder
+// Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
-// Root route serves the index.html
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
+// Routes
+app.use("/", indexRoutes);
+app.use("/", complaintsRoutes);
+app.use("/", adminRoutes);
 
-// Feature routes
-app.use('/', complaintsRoutes);
-app.use('/', adminRoutes);
-
-// Helper function to start server (not auto-invoked in tests)
+// Server startup function
 async function startServer() {
-  await connectDB();
-  return app.listen(PORT, () => {
-    console.log(`Server running on http://${HOST}:${PORT}`);
-  });
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`Server running on http://${HOST}:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
 }
 
-// Only start if not in test environment
-if (process.env.NODE_ENV !== 'test') {
-  startServer().catch(err => {
-    console.error('Failed to start server:', err);
-  });
+// Start server only if not in test environment
+if (process.env.NODE_ENV !== "test") {
+  startServer();
 }
 
-module.exports = { app, startServer }; // Export both for flexibility in tests
+module.exports = app;
